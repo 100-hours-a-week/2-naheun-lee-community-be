@@ -1,43 +1,32 @@
 package com.community.entity;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@Table(name = "user")
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
+
+    @Column(nullable = false, unique = true)
     private String email;
 
-    // 기본 생성자
-    public User() {}
+    @Column(nullable = false)
+    private String password;
 
-    // 생성자
-    public User(Long id, String name, String email) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-    }
+    @Column(nullable = false, unique = true, length = 10)
+    private String nickname;
 
-    // Getter & Setter
-    public Long getId() {
-        return id;
-    }
+    @Column(nullable = false)
+    private String profileImg;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    @Column(nullable = false)
+    private Boolean member = true;
 }
+
 
