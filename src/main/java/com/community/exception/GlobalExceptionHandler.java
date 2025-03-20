@@ -12,7 +12,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 유효성 검사 실패 (필수 필드 누락 등) → 400 Bad Request
+    // 유효성 검사 실패 → 400 Bad Request
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errorResponse = new HashMap<>();
@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
-    // JSON 형식 오류 (잘못된 JSON 요청) → 400 Bad Request
+    // JSON 형식 오류 → 400 Bad Request
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleInvalidJson(HttpMessageNotReadableException ex) {
         Map<String, String> errorResponse = new HashMap<>();

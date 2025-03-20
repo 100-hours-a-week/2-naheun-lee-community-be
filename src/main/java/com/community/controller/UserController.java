@@ -40,7 +40,7 @@ public class UserController {
             String token = userService.login(request);
             return ResponseEntity.ok().body(Map.of("token", token)); 
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage())); // ✅ 401 Unauthorized
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage())); 
         }
     }
 
