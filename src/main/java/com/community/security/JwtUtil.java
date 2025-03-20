@@ -20,8 +20,9 @@ public class JwtUtil {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String email) {
+    public String generateToken(Long userId, String email) {
         return Jwts.builder()
+                .claim("userId", userId) 
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
@@ -32,12 +33,26 @@ public class JwtUtil {
     public String validateToken(String token) {
         try {
             return Jwts.parser()
-                    .verifyWith(secretKey).build() // ✅ 변경된 코드
+                    .verifyWith(secretKey).build()
                     .parseSignedClaims(token)
                     .getPayload()
                     .getSubject();
+        } catch (ExpiredJwtException e) {
+            throw new RuntimeException("Token expired"); 
+        } catch (MalformedJwtException | SignatureException | IllegalArgumentException e) {
+            throw new RuntimeException("Invalid token"); 
+        }
+    }
+
+    public Long getUserIdFromToken(String token) { // 토큰으로 userId 가져오기
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(secretKey).build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claims.get("userId", Long.class); 
         } catch (JwtException e) {
-            return null; // ✅ 만료된 토큰은 null 반환
+            throw new RuntimeException("Invalid or expired token");
         }
     }
 }

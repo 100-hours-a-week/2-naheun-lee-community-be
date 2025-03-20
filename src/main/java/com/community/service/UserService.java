@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.community.exception.ConflictException;
+import com.community.exception.NotFoundException;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    /* 회원가입 */
+    // 회원가입 
     public String signup(UserSignupRequest request, MultipartFile profileImage) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ConflictException("Email already exists");
@@ -54,23 +55,22 @@ public class UserService {
         }
     }
     
-
-    /* 로그인 */
+    // 로그인 
     public String login(UserLoginRequest request) {
-        UserEntity user = userRepository.findUserByEmail(request.getEmail())
+        UserEntity user = userRepository.findActiveUserByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
-        return jwtUtil.generateToken(request.getEmail());
+        return jwtUtil.generateToken(user.getId(), user.getEmail());
     }
 
-    /* 회원정보 조회 */
+    // 회원정보 조회
     public UserResponseDTO getUserProfile(Long userId) {
-        UserEntity user = userRepository.findUserById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity user = userRepository.findActiveUserById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         return UserResponseDTO.builder()
                 .nickname(user.getNickname())
@@ -79,39 +79,39 @@ public class UserService {
                 .build();
     }
 
-    /* 회원정보 수정 */
+    // 회원정보 수정 
     public void updateProfile(Long userId, UserProfileRequest request) {
-        UserEntity user = userRepository.findUserById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity user = userRepository.findActiveUserById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (request.getNickname() != null) user.setNickname(request.getNickname());
 
         if (request.getProfileImage() != null) {
-            user.setProfileImage(request.getProfileImage()); // 업로드된 이미지 URL 적용
+            user.setProfileImage(request.getProfileImage()); 
         }
 
         userRepository.save(user);
     }
 
-    /* 비밀번호 변경 */
+    // 비밀번호 변경 
     public void updatePassword(Long userId, UserPasswordRequest request) {
-        UserEntity user = userRepository.findUserById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity user = userRepository.findActiveUserById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
     }
 
-    /* 회원탈퇴 */
+    // 회원탈퇴 
     public void deactivateUser(Long userId) {
-        UserEntity user = userRepository.findUserById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity user = userRepository.findActiveUserById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         user.deactivate();
         userRepository.save(user);
     }
 
-    /* 파일 저장 로직 */
+    // 파일 저장 로직 
     public String saveProfileImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             return null; 
@@ -136,7 +136,7 @@ public class UserService {
         }
     }
 
-    /* 파일 삭제 로직 */
+    // 파일 삭제 로직 
     private void deleteProfileImage(String filePath) {
         File file = new File(filePath);
         if (file.exists()) {

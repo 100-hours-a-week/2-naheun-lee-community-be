@@ -26,12 +26,20 @@ public class JwtFilter extends HttpFilter {
 
         String token = getTokenFromRequest(request);
         if (token != null) {
-            String email = jwtUtil.validateToken(token);
-            if (email != null) {
-                UserDetails userDetails = new User(email, "", Collections.emptyList());
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            try {
+                Long userId = jwtUtil.getUserIdFromToken(token); 
+                if (userId != null) {
+                    UserDetails userDetails = new User(userId.toString(), "", Collections.emptyList()); 
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (Exception e) {
+                // JWT 검증 실패 시 401 반환
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\": \"Invalid or expired token\"}");
+                return; 
             }
         }
         chain.doFilter(request, response);
