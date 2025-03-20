@@ -19,7 +19,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private static final String UPLOAD_DIR = "/uploads/";
 
     /* 회원가입 */
     public String signup(UserSignupRequest request) {
@@ -27,13 +26,11 @@ public class UserService {
             throw new RuntimeException("Email already exists");
         }
 
-        String profileImageUrl = saveProfileImage(request.getProfileImage());
-
         UserEntity user = UserEntity.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
-                .profileImage(profileImageUrl)
+                .profileImage(request.getProfileImage()) // 파일 저장 후 받은 URL을 그대로 사용
                 .member(true)
                 .build();
         userRepository.save(user);
@@ -72,8 +69,7 @@ public class UserService {
         if (request.getNickname() != null) user.setNickname(request.getNickname());
 
         if (request.getProfileImage() != null) {
-            String profileImageUrl = saveProfileImage(request.getProfileImage());
-            user.setProfileImage(profileImageUrl);
+            user.setProfileImage(request.getProfileImage()); // 업로드된 이미지 URL 적용
         }
 
         userRepository.save(user);
@@ -98,22 +94,31 @@ public class UserService {
     }
 
     /* 파일 저장 로직 */
-    private String saveProfileImage(MultipartFile file) {
+    public String saveProfileImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            return null;
+            return null; 
         }
-
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        File uploadFile = new File(UPLOAD_DIR + fileName);
-
+    
         try {
-            file.transferTo(uploadFile);
-            return "/uploads/" + fileName;
+            String uploadDir = System.getProperty("user.dir") + "/uploads/"; 
+            File directory = new File(uploadDir);
+            if (!directory.exists()) {
+                directory.mkdirs(); 
+            }
+    
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            String savedFilePath = uploadDir + fileName;
+    
+            File destinationFile = new File(savedFilePath);
+            file.transferTo(destinationFile);
+    
+            return savedFilePath; 
         } catch (IOException e) {
-            throw new RuntimeException("File upload failed");
+            throw new RuntimeException("File upload failed: " + e.getMessage());
         }
     }
 }
+
 
 
 

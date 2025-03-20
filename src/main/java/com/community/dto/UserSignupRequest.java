@@ -2,7 +2,6 @@ package com.community.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -30,8 +29,8 @@ public class UserSignupRequest {
     )
     private String nickname;
 
-    @NotNull(message = "프로필 사진은 필수입니다.")
-    private MultipartFile profileImage;
+    @NotBlank(message = "프로필 사진은 필수입니다.")
+    private String profileImage;
 }
 
 

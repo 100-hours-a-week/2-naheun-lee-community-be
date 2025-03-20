@@ -37,8 +37,10 @@ public class SecurityConfig {
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/user/signup", "/user/login").permitAll()
-                .anyRequest().authenticated())
+                .requestMatchers("/", "/user/signup", "/user/login").permitAll()
+                .requestMatchers("/uploads/**").permitAll() 
+                .anyRequest().authenticated()
+            )
             .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

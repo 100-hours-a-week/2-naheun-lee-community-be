@@ -21,30 +21,26 @@ public class UserController {
     private final JwtUtil jwtUtil;
 
     /* 회원가입 */
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(
-            @RequestPart("email") String email,
-            @RequestPart("password") String password,
-            @RequestPart("nickname") String nickname,
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+    @PostMapping(value = "/signup", consumes = "multipart/form-data")
+        public ResponseEntity<?> signup(
+                @RequestParam("email") String email,
+                @RequestParam("password") String password,
+                @RequestParam("nickname") String nickname,
+                @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 
-        UserSignupRequest request = UserSignupRequest.builder()
-                .email(email)
-                .password(password)
-                .nickname(nickname)
-                .profileImage(profileImage)
-                .build();
+            String profileImageUrl = (profileImage != null && !profileImage.isEmpty()) 
+                    ? userService.saveProfileImage(profileImage) 
+                    : null;
 
-        return ResponseEntity.ok(userService.signup(request));
-    }
+            UserSignupRequest request = UserSignupRequest.builder()
+                    .email(email)
+                    .password(password)
+                    .nickname(nickname)
+                    .profileImage(profileImageUrl)
+                    .build();
 
-    /* 로그인 (JWT 발급) */
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid UserLoginRequest request, HttpServletResponse response) {
-        String token = userService.login(request);
-        response.setHeader("Authorization", "Bearer " + token); // JWT 토큰을 응답 헤더에 포함
-        return ResponseEntity.ok("Login successful");
-    }
+            return ResponseEntity.ok(userService.signup(request));
+        }
 
     /* 로그아웃 (프론트에서 토큰 삭제) */
     @PostMapping("/logout")
@@ -74,14 +70,15 @@ public class UserController {
     /* 회원정보 수정 */
     @PatchMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String token,
-                                           @RequestPart(value = "nickname", required = false) String nickname,
+                                           @RequestPart("data") UserProfileRequest request,
                                            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         Long userId = Long.parseLong(jwtUtil.validateToken(token.replace("Bearer ", "")));
 
-        UserProfileRequest request = UserProfileRequest.builder()
-                .nickname(nickname)
-                .profileImage(profileImage)
-                .build();
+        // 프로필 이미지 저장 (파일을 업로드한 경우에만 저장)
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String profileImageUrl = userService.saveProfileImage(profileImage);
+            request.setProfileImage(profileImageUrl);
+        }
 
         userService.updateProfile(userId, request);
         return ResponseEntity.ok("Profile updated successfully");
@@ -96,5 +93,6 @@ public class UserController {
         return ResponseEntity.ok("Password updated successfully");
     }
 }
+
 
 
