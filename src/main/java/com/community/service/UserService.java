@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.community.exception.ConflictException;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,21 +22,38 @@ public class UserService {
     private final JwtUtil jwtUtil;
 
     /* 회원가입 */
-    public String signup(UserSignupRequest request) {
+    public String signup(UserSignupRequest request, MultipartFile profileImage) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new ConflictException("Email already exists");
         }
-
-        UserEntity user = UserEntity.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .nickname(request.getNickname())
-                .profileImage(request.getProfileImage()) // 파일 저장 후 받은 URL을 그대로 사용
-                .member(true)
-                .build();
-        userRepository.save(user);
-        return "register_success";
+        if (userRepository.existsByNickname(request.getNickname())) {
+            throw new ConflictException("Nickname already exists");
+        }
+    
+        String profileImageUrl = null;
+        try {
+            if (profileImage != null && !profileImage.isEmpty()) {
+                profileImageUrl = saveProfileImage(profileImage);
+            }
+    
+            UserEntity user = UserEntity.builder()
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .nickname(request.getNickname())
+                    .profileImage(profileImageUrl)
+                    .member(true)
+                    .build();
+            userRepository.save(user);
+    
+            return "register_success";
+        } catch (Exception e) {
+            if (profileImageUrl != null) {
+                deleteProfileImage(profileImageUrl);
+            }
+            throw e;
+        }
     }
+    
 
     /* 로그인 */
     public String login(UserLoginRequest request) {
@@ -115,6 +133,14 @@ public class UserService {
             return savedFilePath; 
         } catch (IOException e) {
             throw new RuntimeException("File upload failed: " + e.getMessage());
+        }
+    }
+
+    /* 파일 삭제 로직 */
+    private void deleteProfileImage(String filePath) {
+        File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
         }
     }
 }

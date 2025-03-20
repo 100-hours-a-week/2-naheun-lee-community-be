@@ -7,11 +7,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -21,26 +23,26 @@ public class UserController {
     private final JwtUtil jwtUtil;
 
     /* 회원가입 */
-    @PostMapping(value = "/signup", consumes = "multipart/form-data")
-        public ResponseEntity<?> signup(
-                @RequestParam("email") String email,
-                @RequestParam("password") String password,
-                @RequestParam("nickname") String nickname,
-                @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+    @Validated
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(
+        @RequestPart("data") @Valid UserSignupRequest request,  
+        @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) { 
 
-            String profileImageUrl = (profileImage != null && !profileImage.isEmpty()) 
-                    ? userService.saveProfileImage(profileImage) 
-                    : null;
+        String result = userService.signup(request, profileImage);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
 
-            UserSignupRequest request = UserSignupRequest.builder()
-                    .email(email)
-                    .password(password)
-                    .nickname(nickname)
-                    .profileImage(profileImageUrl)
-                    .build();
-
-            return ResponseEntity.ok(userService.signup(request));
+    /* 로그인 */
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid UserLoginRequest request) {
+        try {
+            String token = userService.login(request);
+            return ResponseEntity.ok().body(Map.of("token", token)); 
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage())); // ✅ 401 Unauthorized
         }
+    }
 
     /* 로그아웃 (프론트에서 토큰 삭제) */
     @PostMapping("/logout")
@@ -93,6 +95,5 @@ public class UserController {
         return ResponseEntity.ok("Password updated successfully");
     }
 }
-
 
 

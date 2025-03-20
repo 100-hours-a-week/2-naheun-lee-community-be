@@ -28,9 +28,6 @@ public class UserSignupRequest {
         message = "닉네임은 공백 없이 한글, 영문, 숫자만 입력 가능합니다."
     )
     private String nickname;
-
-    @NotBlank(message = "프로필 사진은 필수입니다.")
-    private String profileImage;
 }
 
 
