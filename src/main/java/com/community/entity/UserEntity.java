@@ -36,11 +36,17 @@ public class UserEntity {
     @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP")
+    @Column(name = "updated_at", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedAt;
 
     public void encodePassword(BCryptPasswordEncoder encoder) {
         this.password = encoder.encode(this.password);
+    }
+
+    // `updatedAt` 자동 갱신
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void deactivate() { // 탈퇴 회원 처리

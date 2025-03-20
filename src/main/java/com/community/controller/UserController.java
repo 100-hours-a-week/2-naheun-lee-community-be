@@ -58,7 +58,7 @@ public class UserController {
         if (token == null || !token.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body("Invalid token");
         }
-        return ResponseEntity.ok("Logout successful");
+        return ResponseEntity.ok(Map.of("message","logout_success"));
     }
 
     // 회원정보 조회 
@@ -78,18 +78,21 @@ public class UserController {
     // 회원정보 수정 
     @PatchMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String token,
-                                           @RequestPart("data") UserProfileRequest request,
+                                           @RequestPart(value = "nickname", required = false) @Valid UserProfileRequest request,
                                            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         Long userId = getCurrentUserId();
 
-        // 프로필 이미지 저장 (파일을 업로드한 경우에만 저장)
-        if (profileImage != null && !profileImage.isEmpty()) {
-            String profileImageUrl = userService.saveProfileImage(profileImage);
-            request.setProfileImage(profileImageUrl);
+        if (request == null) {
+            request = new UserProfileRequest();
         }
 
-        userService.updateProfile(userId, request);
-        return ResponseEntity.ok("Profile updated successfully");
+        // 프로필 이미지 저장 (파일을 업로드한 경우에만 저장)
+        if (request.getNickname() != null || (profileImage != null && !profileImage.isEmpty())) {
+            userService.updateProfile(userId, request, profileImage);
+            return ResponseEntity.ok(Map.of("message", "profile_update_success"));
+        }
+    
+        throw new BadRequestException("No valid fields to update");
     }
 
     // 비밀번호 변경 
@@ -98,7 +101,7 @@ public class UserController {
                                             @RequestBody @Valid UserPasswordRequest request) {
         Long userId = getCurrentUserId();
         userService.updatePassword(userId, request);
-        return ResponseEntity.ok("Password updated successfully");
+        return ResponseEntity.ok(Map.of("message", "password_update_success"));
     }
 
     
@@ -107,7 +110,7 @@ public class UserController {
     public ResponseEntity<?> deactivateUser(@RequestHeader("Authorization") String token) {
         Long userId = getCurrentUserId();
         userService.deactivateUser(userId);
-        return ResponseEntity.ok("Account deactivated successfully");
+        return ResponseEntity.ok(Map.of("message", "member_delete_success"));
     }
 
     // SecurityContextHolder에서 현재 로그인한 유저의 ID 가져오기기

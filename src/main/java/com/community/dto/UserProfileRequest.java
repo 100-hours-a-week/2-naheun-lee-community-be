@@ -1,5 +1,7 @@
 package com.community.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -8,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = false)
 public class UserProfileRequest {
     @Size(max = 10, message = "닉네임은 최대 10자까지 입력 가능합니다.")
     @Pattern(
@@ -15,8 +18,5 @@ public class UserProfileRequest {
         message = "닉네임은 공백 없이 한글, 영문, 숫자만 입력 가능합니다."
     )
     private String nickname;
-
-    @NotBlank(message = "프로필 사진은 필수입니다.")
-    private String profileImage;
 }
 

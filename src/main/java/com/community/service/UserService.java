@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.community.exception.ConflictException;
 import com.community.exception.NotFoundException;
+import com.community.exception.BadRequestException;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -80,17 +82,32 @@ public class UserService {
     }
 
     // 회원정보 수정 
-    public void updateProfile(Long userId, UserProfileRequest request) {
+    public void updateProfile(Long userId, UserProfileRequest request, MultipartFile profileImage) {
         UserEntity user = userRepository.findActiveUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-
-        if (request.getNickname() != null) user.setNickname(request.getNickname());
-
-        if (request.getProfileImage() != null) {
-            user.setProfileImage(request.getProfileImage()); 
+    
+        boolean isUpdated = false;
+        String profileImageUrl = null;
+    
+        if (request.getNickname() != null) {
+            user.setNickname(request.getNickname());
+            isUpdated = true;
         }
+    
+        if (profileImage != null && !profileImage.isEmpty()) {
+            deleteProfileImage(user.getProfileImage());
 
-        userRepository.save(user);
+            profileImageUrl = saveProfileImage(profileImage);
+            user.setProfileImage(profileImageUrl);
+            isUpdated = true;
+        }
+    
+        if (isUpdated) {
+            user.setUpdatedAt(LocalDateTime.now()); 
+            userRepository.save(user);
+        } else {
+            throw new BadRequestException("No valid fields to update");
+        }
     }
 
     // 비밀번호 변경 
@@ -99,6 +116,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
@@ -108,6 +126,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         user.deactivate();
+        user.setUpdatedAt(LocalDateTime.now()); 
         userRepository.save(user);
     }
 
@@ -138,9 +157,13 @@ public class UserService {
 
     // 파일 삭제 로직 
     private void deleteProfileImage(String filePath) {
-        File file = new File(filePath);
-        if (file.exists()) {
-            file.delete();
+        if (filePath != null) {
+            File file = new File(filePath);
+            if (file.exists()) {
+                if (!file.delete()) {
+                    throw new RuntimeException("Failed to delete profile image: " + filePath);
+                }
+            }
         }
     }
 }
