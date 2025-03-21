@@ -132,7 +132,7 @@ public class UserController {
     }
     
     throw new UnauthorizedException("User not authenticated"); 
-}
+    }
 }
 
 

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 import com.community.exception.ConflictException;
 import com.community.exception.NotFoundException;
 import com.community.exception.BadRequestException;
@@ -25,6 +26,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
 
     // 회원가입 
+    @Transactional
     public String signup(UserSignupRequest request, MultipartFile profileImage) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ConflictException("Email already exists");
@@ -81,7 +83,8 @@ public class UserService {
                 .build();
     }
 
-    // 회원정보 수정 
+    // 회원정보 수정
+    @Transactional 
     public void updateProfile(Long userId, UserProfileRequest request, MultipartFile profileImage) {
         UserEntity user = userRepository.findActiveUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
@@ -111,6 +114,7 @@ public class UserService {
     }
 
     // 비밀번호 변경 
+    @Transactional
     public void updatePassword(Long userId, UserPasswordRequest request) {
         UserEntity user = userRepository.findActiveUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
@@ -121,6 +125,7 @@ public class UserService {
     }
 
     // 회원탈퇴 
+    @Transactional
     public void deactivateUser(Long userId) {
         UserEntity user = userRepository.findActiveUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
