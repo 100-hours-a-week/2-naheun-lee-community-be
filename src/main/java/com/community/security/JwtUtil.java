@@ -5,6 +5,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.community.exception.UnauthorizedException;
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -46,13 +48,18 @@ public class JwtUtil {
 
     public Long getUserIdFromToken(String token) { // 토큰으로 userId 가져오기
         try {
+            if (token.startsWith("Bearer ")) {
+                token = token.replace("Bearer ", "");
+            }
+    
             Claims claims = Jwts.parser()
                     .verifyWith(secretKey).build()
                     .parseSignedClaims(token)
                     .getPayload();
-            return claims.get("userId", Long.class); 
+    
+            return claims.get("userId", Long.class);
         } catch (JwtException e) {
-            throw new RuntimeException("Invalid or expired token");
+            throw new UnauthorizedException("Invalid or expired token");
         }
     }
 }

@@ -45,7 +45,7 @@ public class UserService {
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .nickname(request.getNickname())
-                    .profileImage(profileImageUrl)
+                    .profileImg(profileImageUrl)
                     .member(true)
                     .build();
             userRepository.save(user);
@@ -79,7 +79,7 @@ public class UserService {
         return UserResponseDTO.builder()
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-                .profileImage(user.getProfileImage())
+                .profileImg(user.getProfileImg())
                 .build();
     }
 
@@ -98,10 +98,10 @@ public class UserService {
         }
     
         if (profileImage != null && !profileImage.isEmpty()) {
-            deleteProfileImage(user.getProfileImage());
+            deleteProfileImage(user.getProfileImg());
 
             profileImageUrl = saveProfileImage(profileImage);
-            user.setProfileImage(profileImageUrl);
+            user.setProfileImg(profileImageUrl);
             isUpdated = true;
         }
     
@@ -142,7 +142,7 @@ public class UserService {
         }
     
         try {
-            String uploadDir = System.getProperty("user.dir") + "/uploads/"; 
+            String uploadDir = System.getProperty("user.dir") + "/profileuploads/"; 
             File directory = new File(uploadDir);
             if (!directory.exists()) {
                 directory.mkdirs(); 

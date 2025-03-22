@@ -28,7 +28,7 @@ public class UserEntity {
     private String nickname;
 
     @Column(nullable = false, name = "profile_img")
-    private String profileImage;
+    private String profileImg;
 
     @Column(nullable = false)
     private boolean member; 
@@ -43,13 +43,13 @@ public class UserEntity {
         this.password = encoder.encode(this.password);
     }
 
-    // `updatedAt` 자동 갱신
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void deactivate() { // 탈퇴 회원 처리
+     // 탈퇴 회원 처리
+    public void deactivate() { 
         this.member = false;
         this.email = "deleted_" + this.id + "@deleted.com"; 
         this.nickname = null;

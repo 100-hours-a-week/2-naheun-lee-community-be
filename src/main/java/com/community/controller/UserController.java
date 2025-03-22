@@ -34,9 +34,9 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<?> signup(
         @RequestPart("data") @Valid UserSignupRequest request,  
-        @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) { 
+        @RequestPart(value = "profileImage") MultipartFile imageFile) { 
 
-        String result = userService.signup(request, profileImage);
+        String result = userService.signup(request, imageFile);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
@@ -64,7 +64,7 @@ public class UserController {
     // 회원정보 조회 
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String token) {
-        Long userId =  getCurrentUserId();
+        Long userId =  jwtUtil.getUserIdFromToken(token); 
 
         UserResponseDTO userProfile = userService.getUserProfile(userId); 
 
@@ -79,16 +79,16 @@ public class UserController {
     @PatchMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String token,
                                            @RequestPart(value = "nickname", required = false) @Valid UserProfileRequest request,
-                                           @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
-        Long userId = getCurrentUserId();
+                                           @RequestPart(value = "profileImage", required = false) MultipartFile imageFile) {
+        Long userId = jwtUtil.getUserIdFromToken(token); 
 
         if (request == null) {
             request = new UserProfileRequest();
         }
 
         // 프로필 이미지 저장 (파일을 업로드한 경우에만 저장)
-        if (request.getNickname() != null || (profileImage != null && !profileImage.isEmpty())) {
-            userService.updateProfile(userId, request, profileImage);
+        if (request.getNickname() != null || (imageFile != null && !imageFile.isEmpty())) {
+            userService.updateProfile(userId, request, imageFile);
             return ResponseEntity.ok(Map.of("message", "profile_update_success"));
         }
     
@@ -99,7 +99,7 @@ public class UserController {
     @PatchMapping("/password")
     public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String token,
                                             @RequestBody @Valid UserPasswordRequest request) {
-        Long userId = getCurrentUserId();
+        Long userId = jwtUtil.getUserIdFromToken(token); 
         userService.updatePassword(userId, request);
         return ResponseEntity.ok(Map.of("message", "password_update_success"));
     }
@@ -108,31 +108,11 @@ public class UserController {
     // 회원탈퇴 
     @DeleteMapping("")
     public ResponseEntity<?> deactivateUser(@RequestHeader("Authorization") String token) {
-        Long userId = getCurrentUserId();
+        Long userId = jwtUtil.getUserIdFromToken(token); 
         userService.deactivateUser(userId);
         return ResponseEntity.ok(Map.of("message", "member_delete_success"));
     }
 
-    // SecurityContextHolder에서 현재 로그인한 유저의 ID 가져오기기
-    private Long getCurrentUserId() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    
-    if (authentication == null || !authentication.isAuthenticated()) {
-        throw new UnauthorizedException("User not authenticated"); 
-    }
-
-    Object principal = authentication.getPrincipal();
-    
-    if (principal instanceof UserDetails) {
-        try {
-            return Long.parseLong(((UserDetails) principal).getUsername()); 
-        } catch (NumberFormatException e) {
-            throw new BadRequestException("Invalid user ID format"); 
-        }
-    }
-    
-    throw new UnauthorizedException("User not authenticated"); 
-    }
 }
 
 

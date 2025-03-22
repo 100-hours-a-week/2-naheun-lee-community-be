@@ -39,15 +39,31 @@ public class PostEntity {
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedAt;
 
-    // 수정 시 updatedAt 자동 갱신
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // 조회수 증가 메서드
+    // 조회수 증가 
     public void incrementViews() {
         this.views += 1;
+    }
+
+    // 게시글 수정
+    public void update(String title, String content, String newImagePath) {
+        if (title != null && !title.isBlank()) {
+            this.title = title;
+        }
+    
+        if (content != null && !content.isBlank()) {
+            this.content = content;
+        }
+    
+        if (newImagePath != null && !newImagePath.isBlank()) {
+            this.postImg = newImagePath;
+        }
+    
+        this.updatedAt = LocalDateTime.now();
     }
 }
 
