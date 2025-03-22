@@ -27,7 +27,7 @@ public class UserService {
 
     // 회원가입 
     @Transactional
-    public String signup(UserSignupRequest request, MultipartFile profileImage) {
+    public String signup(UserSignupRequestDTO request, MultipartFile profileImage) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ConflictException("Email already exists");
         }
@@ -60,7 +60,7 @@ public class UserService {
     }
     
     // 로그인 
-    public String login(UserLoginRequest request) {
+    public String login(UserLoginRequestDTO request) {
         UserEntity user = userRepository.findActiveUserByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
@@ -85,7 +85,7 @@ public class UserService {
 
     // 회원정보 수정
     @Transactional 
-    public void updateProfile(Long userId, UserProfileRequest request, MultipartFile profileImage) {
+    public void updateProfile(Long userId, UserProfileUpdateDTO request, MultipartFile profileImage) {
         UserEntity user = userRepository.findActiveUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
     
@@ -115,7 +115,7 @@ public class UserService {
 
     // 비밀번호 변경 
     @Transactional
-    public void updatePassword(Long userId, UserPasswordRequest request) {
+    public void updatePassword(Long userId, UserPasswordUpdateDTO request) {
         UserEntity user = userRepository.findActiveUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 

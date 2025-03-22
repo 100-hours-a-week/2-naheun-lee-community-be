@@ -39,6 +39,11 @@ public class PostEntity {
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedAt;
 
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
+    
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();

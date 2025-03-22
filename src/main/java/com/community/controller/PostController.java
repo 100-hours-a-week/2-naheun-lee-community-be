@@ -26,7 +26,7 @@ public class PostController {
     private final JwtUtil jwtUtil;
 
     // 게시글 작성
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<?> createPost(@RequestHeader("Authorization") String token,
                                         @RequestPart("data") @Valid PostRequestDTO request,
                                         @RequestPart(value = "postImage", required = false) MultipartFile imageFile) {
@@ -38,47 +38,15 @@ public class PostController {
     // 게시글 리스트 조회
     @GetMapping("/posts")
     public ResponseEntity<?> getAllPosts() {
-        List<PostEntity> posts = postService.getAllPosts();
-        List<PostResponseDTO> response = posts.stream().map(post -> PostResponseDTO.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .postImg(post.getPostImg())
-                .views(post.getViews())
-                .likesCount(0)
-                .commentsCount(0)
-                .createdAt(post.getCreatedAt())
-                .updatedAt(post.getUpdatedAt())
-                .author(PostResponseDTO.AuthorDTO.builder()
-                        .nickname(post.getUser().getNickname())
-                        .profileImg(post.getUser().getProfileImg())
-                        .build())
-                .build()).collect(Collectors.toList());
-
+        List<PostResponseDTO> response = postService.getAllPosts();
         return ResponseEntity.ok(Map.of("total_posts", response.size(), "data", response));
     }
+
 
     // 게시글 조회
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPostById(@PathVariable("postId") Long postId) {
-        PostEntity post = postService.getPostById(postId);
-
-        PostResponseDTO response = PostResponseDTO.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .postImg(post.getPostImg())
-                .views(post.getViews())
-                .likesCount(0)
-                .commentsCount(0)
-                .createdAt(post.getCreatedAt())
-                .updatedAt(post.getUpdatedAt())
-                .author(PostResponseDTO.AuthorDTO.builder()
-                        .nickname(post.getUser().getNickname())
-                        .profileImg(post.getUser().getProfileImg())
-                        .build())
-                .build();
-
+        PostResponseDTO response = postService.getPostDTOById(postId);
         return ResponseEntity.ok(Map.of("data", List.of(response)));
     }
 

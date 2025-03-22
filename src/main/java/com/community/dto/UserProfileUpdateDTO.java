@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = false)
-public class UserProfileRequest {
+public class UserProfileUpdateDTO {
     @Size(max = 10, message = "닉네임은 최대 10자까지 입력 가능합니다.")
     @Pattern(
         regexp = "^[a-zA-Z0-9가-힣]+$",

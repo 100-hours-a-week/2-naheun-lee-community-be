@@ -33,7 +33,7 @@ public class UserController {
     @Validated
     @PostMapping("/signup")
     public ResponseEntity<?> signup(
-        @RequestPart("data") @Valid UserSignupRequest request,  
+        @RequestPart("data") @Valid UserSignupRequestDTO request,  
         @RequestPart(value = "profileImage") MultipartFile imageFile) { 
 
         String result = userService.signup(request, imageFile);
@@ -42,7 +42,7 @@ public class UserController {
 
     // 로그인 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid UserLoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody @Valid UserLoginRequestDTO request) {
         try {
             String token = userService.login(request);
             return ResponseEntity.ok().body(Map.of("token", token)); 
@@ -78,12 +78,12 @@ public class UserController {
     // 회원정보 수정 
     @PatchMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String token,
-                                           @RequestPart(value = "nickname", required = false) @Valid UserProfileRequest request,
+                                           @RequestPart(value = "nickname", required = false) @Valid UserProfileUpdateDTO request,
                                            @RequestPart(value = "profileImage", required = false) MultipartFile imageFile) {
         Long userId = jwtUtil.getUserIdFromToken(token); 
 
         if (request == null) {
-            request = new UserProfileRequest();
+            request = new UserProfileUpdateDTO();
         }
 
         // 프로필 이미지 저장 (파일을 업로드한 경우에만 저장)
@@ -98,7 +98,7 @@ public class UserController {
     // 비밀번호 변경 
     @PatchMapping("/password")
     public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String token,
-                                            @RequestBody @Valid UserPasswordRequest request) {
+                                            @RequestBody @Valid UserPasswordUpdateDTO request) {
         Long userId = jwtUtil.getUserIdFromToken(token); 
         userService.updatePassword(userId, request);
         return ResponseEntity.ok(Map.of("message", "password_update_success"));

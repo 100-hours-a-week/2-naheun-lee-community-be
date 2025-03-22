@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.community.dto.PostRequestDTO;
+import com.community.dto.PostResponseDTO;
 import com.community.dto.PostUpdateDTO;
 import com.community.entity.PostEntity;
 import com.community.entity.UserEntity;
@@ -46,7 +48,6 @@ public class PostService {
                     .content(request.getContent())
                     .postImg(imageUrl)
                     .user(user)
-                    .createdAt(LocalDateTime.now())
                     .views(0)
                     .build();
 
@@ -60,15 +61,48 @@ public class PostService {
     }
 
     // 게시글 리스트 조회
-    public List<PostEntity> getAllPosts() {
-        return postRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")); // 최신순으로 정렬
+    public List<PostResponseDTO> getAllPosts() {
+        List<PostEntity> posts = postRepository.findAllByOrderByCreatedAtDesc();
+
+        return posts.stream().map(post -> PostResponseDTO.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .postImg(post.getPostImg())
+                .views(post.getViews())
+                .likesCount(0)
+                .commentsCount(0)
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
+                .author(PostResponseDTO.AuthorDTO.builder()
+                        .nickname(post.getUser().getNickname())
+                        .profileImg(post.getUser().getProfileImg())
+                        .build())
+                .build()).collect(Collectors.toList());
     }
 
     // 게시글 조회
-    public PostEntity getPostById(Long postId) {
-        return postRepository.findById(postId)
+    public PostResponseDTO getPostDTOById(Long postId) {
+        PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("Post not found"));
+    
+        return PostResponseDTO.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .postImg(post.getPostImg())
+                .views(post.getViews())
+                .likesCount(0) // 추후 연동 가능
+                .commentsCount(0) // 추후 연동 가능
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
+                .author(PostResponseDTO.AuthorDTO.builder()
+                        .nickname(post.getUser().getNickname())
+                        .profileImg(post.getUser().getProfileImg())
+                        .build())
+                .build();
     }
+    
 
     // 조회수 증가
     @Transactional
