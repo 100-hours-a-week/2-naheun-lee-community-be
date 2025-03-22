@@ -16,12 +16,12 @@ public class CommentResponseDTO {
     private String content;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
-    private AuthorDTO author;
+    private UserDTO user;
 
     @Getter
     @Setter
     @Builder
-    public static class AuthorDTO {
+    public static class UserDTO  {
         private String nickname;
         private String profileImg;
     }

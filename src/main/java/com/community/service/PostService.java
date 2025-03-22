@@ -74,7 +74,7 @@ public class PostService {
                 .commentsCount(0)
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
-                .author(PostResponseDTO.AuthorDTO.builder()
+                .user(PostResponseDTO.UserDTO.builder()
                         .nickname(post.getUser().getNickname())
                         .profileImg(post.getUser().getProfileImg())
                         .build())
@@ -96,7 +96,7 @@ public class PostService {
                 .commentsCount(0) // 추후 연동 가능
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
-                .author(PostResponseDTO.AuthorDTO.builder()
+                .user(PostResponseDTO.UserDTO.builder()
                         .nickname(post.getUser().getNickname())
                         .profileImg(post.getUser().getProfileImg())
                         .build())

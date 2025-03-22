@@ -48,7 +48,7 @@ public class CommentService {
         if (!postRepository.existsById(postId)) {
             throw new NotFoundException("post_not_found");
         }
-        
+
         List<CommentEntity> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
 
         return comments.stream().map(comment ->
@@ -56,7 +56,7 @@ public class CommentService {
                         .commentId(comment.getId())
                         .content(comment.getContent())
                         .createdAt(comment.getCreatedAt())
-                        .author(CommentResponseDTO.AuthorDTO.builder()
+                        .user(CommentResponseDTO.UserDTO.builder()
                                 .nickname(comment.getUser().getNickname())
                                 .profileImg(comment.getUser().getProfileImg())
                                 .build())
@@ -70,12 +70,12 @@ public class CommentService {
         CommentEntity comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("comment not found"));
 
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("permission denied");
-        }
-
         if (!comment.getPost().getId().equals(postId)) {
             throw new NotFoundException("post not found");
+        }
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new UnauthorizedException("permission denied");
         }
 
         comment.updateContent(request.getComment());
@@ -86,13 +86,13 @@ public class CommentService {
     public void deleteComment(Long userId, Long postId, Long commentId) {
         CommentEntity comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("comment not found"));
+                
+        if (!comment.getPost().getId().equals(postId)) {
+            throw new NotFoundException("post not found");
+        }
 
         if (!comment.getUser().getId().equals(userId)) {
             throw new UnauthorizedException("permission denied");
-        }
-
-        if (!comment.getPost().getId().equals(postId)) {
-            throw new NotFoundException("post not found");
         }
 
         commentRepository.delete(comment);
