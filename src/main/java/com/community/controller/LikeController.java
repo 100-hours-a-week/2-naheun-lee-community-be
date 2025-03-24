@@ -23,16 +23,8 @@ public class LikeController {
                                       @PathVariable("postId") Long postId) {
         Long userId = jwtUtil.getUserIdFromToken(token);
         if (userId == null) throw new UnauthorizedException("Unauthorized");
-
-        int likeCount = likeService.likePost(userId, postId);
-
-        return ResponseEntity.ok(Map.of(
-                "message", "like_updated",
-                "data", Map.of(
-                        "post_id", postId,
-                        "likes_count", likeCount
-                )
-        ));
+        likeService.likePost(userId, postId);
+        return ResponseEntity.ok(Map.of("message", "like_updated"));
     }
 
     // 좋아요 취소
@@ -41,16 +33,8 @@ public class LikeController {
                                         @PathVariable("postId") Long postId) {
         Long userId = jwtUtil.getUserIdFromToken(token);
         if (userId == null) throw new UnauthorizedException("Unauthorized");
-
-        int likeCount = likeService.unlikePost(userId, postId);
-
-        return ResponseEntity.ok(Map.of(
-                "message", "like_deleted",
-                "data", Map.of(
-                        "post_id", postId,
-                        "likes_count", likeCount
-                )
-        ));
+        likeService.unlikePost(userId, postId);
+        return ResponseEntity.ok(Map.of("message", "like_deleted"));
     }
 }
 

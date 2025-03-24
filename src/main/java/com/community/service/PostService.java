@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.community.dto.CommentResponseDTO;
 import com.community.dto.PostRequestDTO;
 import com.community.dto.PostResponseDTO;
 import com.community.dto.PostUpdateDTO;
@@ -20,6 +21,9 @@ import com.community.exception.NotFoundException;
 import com.community.exception.UnauthorizedException;
 import com.community.repository.PostRepository;
 import com.community.repository.UserRepository;
+import com.community.repository.LikeRepository;
+import com.community.repository.CommentRepository;
+import com.community.service.CommentService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +34,9 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
+    private final CommentService commentService;
     
     // 게시글 작성
     @Transactional
@@ -70,8 +77,8 @@ public class PostService {
                 .content(post.getContent())
                 .postImg(post.getPostImg())
                 .views(post.getViews())
-                .likesCount(0)
-                .commentsCount(0)
+                .likesCount(likeRepository.countByPost(post))
+                .commentsCount(commentRepository.countByPost(post))
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .user(PostResponseDTO.UserDTO.builder()
@@ -85,6 +92,8 @@ public class PostService {
     public PostResponseDTO getPostDTOById(Long postId) {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("Post not found"));
+
+         List<CommentResponseDTO> comments = commentService.getComments(postId);
     
         return PostResponseDTO.builder()
                 .postId(post.getId())
@@ -92,14 +101,15 @@ public class PostService {
                 .content(post.getContent())
                 .postImg(post.getPostImg())
                 .views(post.getViews())
-                .likesCount(0) // 추후 연동 가능
-                .commentsCount(0) // 추후 연동 가능
+                .likesCount(likeRepository.countByPost(post)) 
+                .commentsCount(commentRepository.countByPost(post)) 
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .user(PostResponseDTO.UserDTO.builder()
                         .nickname(post.getUser().getNickname())
                         .profileImg(post.getUser().getProfileImg())
                         .build())
+                .comments(comments)
                 .build();
     }
     

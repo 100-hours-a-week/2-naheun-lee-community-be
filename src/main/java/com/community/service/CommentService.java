@@ -45,10 +45,6 @@ public class CommentService {
     // 댓글 조회
     @Transactional
     public List<CommentResponseDTO> getComments(Long postId) {
-        if (!postRepository.existsById(postId)) {
-            throw new NotFoundException("post_not_found");
-        }
-
         List<CommentEntity> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
 
         return comments.stream().map(comment ->
@@ -56,6 +52,7 @@ public class CommentService {
                         .commentId(comment.getId())
                         .content(comment.getContent())
                         .createdAt(comment.getCreatedAt())
+                        .updatedAt(comment.getUpdatedAt())
                         .user(CommentResponseDTO.UserDTO.builder()
                                 .nickname(comment.getUser().getNickname())
                                 .profileImg(comment.getUser().getProfileImg())

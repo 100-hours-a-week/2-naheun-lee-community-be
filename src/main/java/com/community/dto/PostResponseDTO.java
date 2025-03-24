@@ -3,6 +3,7 @@ package com.community.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.community.dto.PostResponseDTO.UserDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -23,11 +24,10 @@ public class PostResponseDTO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
-
     private UserDTO user;
+    private List<CommentResponseDTO> comments;
 
     @Getter
     @Setter

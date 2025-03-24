@@ -22,7 +22,7 @@ public class LikeService {
 
     // 좋아요 추가
     @Transactional
-    public int likePost(Long userId, Long postId) {
+    public void likePost(Long userId, Long postId) {
         UserEntity user = userRepository.findActiveUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -39,13 +39,11 @@ public class LikeService {
                 .build();
 
         likeRepository.save(like);
-
-        return likeRepository.countByPost(post); 
     }
 
     // 좋아요 취소
     @Transactional
-    public int unlikePost(Long userId, Long postId) {
+    public void unlikePost(Long userId, Long postId) {
         UserEntity user = userRepository.findActiveUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -56,8 +54,6 @@ public class LikeService {
                 .orElseThrow(() -> new ConflictException("not liked"));
 
         likeRepository.delete(like);
-
-        return likeRepository.countByPost(post); 
     }
 }
 
