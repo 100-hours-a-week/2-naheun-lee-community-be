@@ -4,6 +4,8 @@ import com.community.security.JwtFilter;
 import com.community.security.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,10 +36,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
+            .cors(Customizer.withDefaults())
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/user/signup", "/user/login").permitAll()
+                .requestMatchers("/", "/user/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/user").permitAll()
                 .requestMatchers("/uploads/**").permitAll() 
                 .anyRequest().authenticated()
             )

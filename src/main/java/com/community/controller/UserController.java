@@ -29,17 +29,6 @@ public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    // 회원가입 
-    @Validated
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(
-        @RequestPart("data") @Valid UserSignupRequestDTO request,  
-        @RequestPart(value = "profileImage") MultipartFile imageFile) { 
-
-        String result = userService.signup(request, imageFile);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
-    }
-
     // 로그인 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid UserLoginRequestDTO request) {
@@ -61,8 +50,19 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message","logout_success"));
     }
 
+    // 회원가입 
+    @Validated
+    @PostMapping
+    public ResponseEntity<?> signup(
+        @RequestPart("data") @Valid UserSignupRequestDTO request,  
+        @RequestPart(value = "profileImage") MultipartFile imageFile) { 
+
+        String result = userService.signup(request, imageFile);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
     // 회원정보 조회 
-    @GetMapping("/profile")
+    @GetMapping
     public ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String token) {
         Long userId =  jwtUtil.getUserIdFromToken(token); 
 
@@ -106,7 +106,7 @@ public class UserController {
 
     
     // 회원탈퇴 
-    @DeleteMapping("")
+    @DeleteMapping
     public ResponseEntity<?> deactivateUser(@RequestHeader("Authorization") String token) {
         Long userId = jwtUtil.getUserIdFromToken(token); 
         userService.deactivateUser(userId);

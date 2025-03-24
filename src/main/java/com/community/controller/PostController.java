@@ -39,7 +39,7 @@ public class PostController {
     @GetMapping("/posts")
     public ResponseEntity<?> getAllPosts() {
         List<PostResponseDTO> response = postService.getAllPosts();
-        return ResponseEntity.ok(Map.of("total_posts", response.size(), "data", response));
+        return ResponseEntity.ok(Map.of("message", "posts_fetched", "data", response));
     }
 
 
@@ -47,7 +47,7 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPostById(@PathVariable("postId") Long postId) {
         PostResponseDTO response = postService.getPostDTOById(postId);
-        return ResponseEntity.ok(Map.of("data", List.of(response)));
+        return ResponseEntity.ok(Map.of("message", "post_fetched", "data", List.of(response)));
     }
 
     // 조회수 증가
