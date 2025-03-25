@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import com.community.util.NullSafeUtils;
+
 @Entity
 @Table(name = "posts")
 @Getter
@@ -56,18 +58,9 @@ public class PostEntity {
 
     // 게시글 수정
     public void update(String title, String content, String newImagePath) {
-        if (title != null && !title.isBlank()) {
-            this.title = title;
-        }
-    
-        if (content != null && !content.isBlank()) {
-            this.content = content;
-        }
-    
-        if (newImagePath != null && !newImagePath.isBlank()) {
-            this.postImg = newImagePath;
-        }
-    
+        if (NullSafeUtils.hasText(title)) this.title = title;
+        if (NullSafeUtils.hasText(content)) this.content = content;
+        if (NullSafeUtils.hasText(newImagePath)) this.postImg = newImagePath;
         this.updatedAt = LocalDateTime.now();
     }
 }

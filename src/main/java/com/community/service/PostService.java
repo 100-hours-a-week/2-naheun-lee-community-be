@@ -19,11 +19,14 @@ import com.community.entity.PostEntity;
 import com.community.entity.UserEntity;
 import com.community.exception.NotFoundException;
 import com.community.exception.UnauthorizedException;
+import com.community.exception.BadRequestException;
 import com.community.repository.PostRepository;
 import com.community.repository.UserRepository;
 import com.community.repository.LikeRepository;
 import com.community.repository.CommentRepository;
 import com.community.service.CommentService;
+import com.community.util.NullSafeUtils;
+import com.community.util.FileHandler;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,7 @@ public class PostService {
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
     private final CommentService commentService;
+    private final FileHandler fileHandler;
     
     // 게시글 작성
     @Transactional
@@ -46,9 +50,7 @@ public class PostService {
 
         String imageUrl = null;
         try{
-            if (imageFile != null && !imageFile.isEmpty()) {
-                imageUrl = saveImage(imageFile); 
-            }
+            if (NullSafeUtils.isPresent(imageFile)) imageUrl = fileHandler.saveFile(imageFile, "postuploads"); 
 
             PostEntity post = PostEntity.builder()
                     .title(request.getTitle())
@@ -60,9 +62,7 @@ public class PostService {
 
             postRepository.save(post);
         } catch (Exception e) {
-            if (imageUrl != null) {
-                deleteImage(imageUrl);
-            }
+            if (imageUrl != null) fileHandler.deleteFile(imageUrl);
             throw e;
         }
     }
@@ -112,7 +112,6 @@ public class PostService {
                 .comments(comments)
                 .build();
     }
-    
 
     // 조회수 증가
     @Transactional
@@ -133,23 +132,26 @@ public class PostService {
             throw new UnauthorizedException("Permission denied");
         }
 
+        String title = request != null ? request.getTitle() : null;
+        String content = request != null ? request.getContent() : null;
+        boolean hasImage = NullSafeUtils.isPresent(imageFile);
+
+        if (!NullSafeUtils.hasText(title) && 
+            !NullSafeUtils.hasText(content) && 
+            !hasImage) {
+            throw new BadRequestException("No valid fields to update");
+        }
+
         String imageUrl = null;
         try {
-            if (imageFile != null && !imageFile.isEmpty()) {
-                deleteImage(post.getPostImg());
-                imageUrl = saveImage(imageFile);
+            if (hasImage) {
+                fileHandler.deleteFile(post.getPostImg()); 
+                imageUrl = fileHandler.saveFile(imageFile, "postuploads"); 
             }
-    
-            post.update(
-                request != null ? request.getTitle() : null,
-                request != null ? request.getContent() : null,
-                imageUrl
-            );
-    
+            post.update(title, content, imageUrl); 
+
         } catch (Exception e) {
-            if (imageUrl != null) {
-                deleteImage(imageUrl);
-            }
+            if (imageUrl != null) fileHandler.deleteFile(imageUrl);
             throw e;
         }
     }
@@ -165,43 +167,6 @@ public class PostService {
         }
 
         postRepository.delete(post);
-    }
-
-    // 파일 저장 로직 
-    public String saveImage(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            return null; 
-        }
-    
-        try {
-            String uploadDir = System.getProperty("user.dir") + "/postuploads/"; 
-            File directory = new File(uploadDir);
-            if (!directory.exists()) {
-                directory.mkdirs(); 
-            }
-    
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-            String savedFilePath = uploadDir + fileName;
-    
-            File destinationFile = new File(savedFilePath);
-            file.transferTo(destinationFile);
-    
-            return savedFilePath; 
-        } catch (IOException e) {
-            throw new RuntimeException("File upload failed: " + e.getMessage());
-        }
-    }
-
-    // 파일 삭제 로직 
-    private void deleteImage(String filePath) {
-        if (filePath != null) {
-            File file = new File(filePath);
-            if (file.exists()) {
-                if (!file.delete()) {
-                    throw new RuntimeException("Failed to delete profile image: " + filePath);
-                }
-            }
-        }
     }
 }
 

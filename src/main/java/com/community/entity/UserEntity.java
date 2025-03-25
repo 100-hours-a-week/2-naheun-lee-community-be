@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.community.util.NullSafeUtils;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -58,6 +60,22 @@ public class UserEntity {
         this.member = false;
         this.email = "deleted_" + this.id + "@deleted.com"; 
         this.nickname = null;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 프로필 수정
+    public void updateProfile(String nickname, String profileImg) {
+        if (NullSafeUtils.hasText(nickname)) this.nickname = nickname;
+        if (NullSafeUtils.hasText(profileImg)) this.profileImg = profileImg;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 비밀번호 수정
+    public void updatePassword(String newPassword, BCryptPasswordEncoder encoder) {
+        if (NullSafeUtils.hasText(newPassword)) {
+            this.password = encoder.encode(newPassword);
+            this.updatedAt = LocalDateTime.now();
+        }
     }
 }
 

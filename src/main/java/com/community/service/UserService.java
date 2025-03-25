@@ -4,6 +4,9 @@ import com.community.entity.UserEntity;
 import com.community.dto.*;
 import com.community.repository.UserRepository;
 import com.community.security.JwtUtil;
+import com.community.util.NullSafeUtils;
+import com.community.util.FileHandler;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final FileHandler fileHandler;
 
     // 회원가입 
     @Transactional
@@ -37,8 +41,8 @@ public class UserService {
     
         String profileImageUrl = null;
         try {
-            if (profileImage != null && !profileImage.isEmpty()) {
-                profileImageUrl = saveProfileImage(profileImage);
+            if (NullSafeUtils.isPresent(profileImage)) {
+                profileImageUrl = fileHandler.saveFile(profileImage, "profileuploads"); 
             }
     
             UserEntity user = UserEntity.builder()
@@ -52,9 +56,7 @@ public class UserService {
     
             return "register_success";
         } catch (Exception e) {
-            if (profileImageUrl != null) {
-                deleteProfileImage(profileImageUrl);
-            }
+            if (profileImageUrl != null) fileHandler.deleteFile(profileImageUrl); 
             throw e;
         }
     }
@@ -88,28 +90,27 @@ public class UserService {
     public void updateProfile(Long userId, UserProfileUpdateDTO request, MultipartFile profileImage) {
         UserEntity user = userRepository.findActiveUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-    
-        boolean isUpdated = false;
-        String profileImageUrl = null;
-    
-        if (request.getNickname() != null) {
-            user.setNickname(request.getNickname());
-            isUpdated = true;
-        }
-    
-        if (profileImage != null && !profileImage.isEmpty()) {
-            deleteProfileImage(user.getProfileImg());
 
-            profileImageUrl = saveProfileImage(profileImage);
-            user.setProfileImg(profileImageUrl);
-            isUpdated = true;
-        }
-    
-        if (isUpdated) {
-            user.setUpdatedAt(LocalDateTime.now()); 
-            userRepository.save(user);
-        } else {
+        String nickname = request != null ? request.getNickname() : null;
+        boolean hasNickname = NullSafeUtils.hasText(nickname); 
+        boolean hasImage = NullSafeUtils.isPresent(profileImage); 
+
+        if (!hasNickname && !hasImage) {
             throw new BadRequestException("No valid fields to update");
+        }
+
+        String profileImageUrl = null;
+        try {
+            if (hasImage) {
+                fileHandler.deleteFile(user.getProfileImg()); 
+                profileImageUrl = fileHandler.saveFile(profileImage, "profileuploads");
+            }
+
+            user.updateProfile(nickname, profileImageUrl);
+            userRepository.save(user);
+        } catch (Exception e) {
+            if (profileImageUrl != null) fileHandler.deleteFile(profileImageUrl); 
+            throw e;
         }
     }
 
@@ -119,8 +120,7 @@ public class UserService {
         UserEntity user = userRepository.findActiveUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setUpdatedAt(LocalDateTime.now());
+        user.updatePassword(request.getPassword(), passwordEncoder);
         userRepository.save(user);
     }
 
@@ -131,45 +131,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         user.deactivate();
-        user.setUpdatedAt(LocalDateTime.now()); 
         userRepository.save(user);
-    }
-
-    // 파일 저장 로직 
-    public String saveProfileImage(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            return null; 
-        }
-    
-        try {
-            String uploadDir = System.getProperty("user.dir") + "/profileuploads/"; 
-            File directory = new File(uploadDir);
-            if (!directory.exists()) {
-                directory.mkdirs(); 
-            }
-    
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-            String savedFilePath = uploadDir + fileName;
-    
-            File destinationFile = new File(savedFilePath);
-            file.transferTo(destinationFile);
-    
-            return savedFilePath; 
-        } catch (IOException e) {
-            throw new RuntimeException("File upload failed: " + e.getMessage());
-        }
-    }
-
-    // 파일 삭제 로직 
-    private void deleteProfileImage(String filePath) {
-        if (filePath != null) {
-            File file = new File(filePath);
-            if (file.exists()) {
-                if (!file.delete()) {
-                    throw new RuntimeException("Failed to delete profile image: " + filePath);
-                }
-            }
-        }
     }
 }
 
