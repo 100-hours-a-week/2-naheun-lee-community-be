@@ -28,6 +28,7 @@ public class PostResponseDTO {
     private LocalDateTime updatedAt;
     private UserDTO user;
     private List<CommentResponseDTO> comments;
+    private boolean isLikedByCurrentUser;
 
     @Getter
     @Setter

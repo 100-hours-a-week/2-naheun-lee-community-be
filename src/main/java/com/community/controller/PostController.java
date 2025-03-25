@@ -45,9 +45,11 @@ public class PostController {
 
     // 게시글 조회
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getPostById(@PathVariable("postId") Long postId) {
-        PostResponseDTO response = postService.getPostDTOById(postId);
-        return ResponseEntity.ok(Map.of("message", "post_fetched", "data", List.of(response)));
+    public ResponseEntity<?> getPostById(@RequestHeader("Authorization") String token,
+                                         @PathVariable("postId") Long postId) {
+        Long userId = jwtUtil.getUserIdFromToken(token);
+        PostResponseDTO response = postService.getPostDTOById(postId, userId);
+        return ResponseEntity.ok(Map.of("message", "post_fetched", "data", response));
     }
 
     // 조회수 증가

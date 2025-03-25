@@ -89,11 +89,15 @@ public class PostService {
     }
 
     // 게시글 조회
-    public PostResponseDTO getPostDTOById(Long postId) {
+    public PostResponseDTO getPostDTOById(Long postId, Long userId) {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("Post not found"));
 
+        UserEntity user = userRepository.findActiveUserById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
          List<CommentResponseDTO> comments = commentService.getComments(postId);
+         boolean isLiked = likeRepository.existsByUserAndPost(user, post);
     
         return PostResponseDTO.builder()
                 .postId(post.getId())
@@ -110,6 +114,7 @@ public class PostService {
                         .profileImg(post.getUser().getProfileImg())
                         .build())
                 .comments(comments)
+                .isLikedByCurrentUser(isLiked)
                 .build();
     }
 
@@ -136,9 +141,7 @@ public class PostService {
         String content = request != null ? request.getContent() : null;
         boolean hasImage = NullSafeUtils.isPresent(imageFile);
 
-        if (!NullSafeUtils.hasText(title) && 
-            !NullSafeUtils.hasText(content) && 
-            !hasImage) {
+        if (!NullSafeUtils.hasText(title) && !NullSafeUtils.hasText(content) && !hasImage) {
             throw new BadRequestException("No valid fields to update");
         }
 
