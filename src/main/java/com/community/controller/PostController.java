@@ -3,10 +3,8 @@ package com.community.controller;
 import com.community.dto.PostRequestDTO;
 import com.community.dto.PostResponseDTO;
 import com.community.dto.PostUpdateDTO;
-import com.community.entity.PostEntity;
 import com.community.security.JwtUtil;
 import com.community.service.PostService;
-import com.community.exception.UnauthorizedException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/post")

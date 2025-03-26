@@ -4,17 +4,11 @@ import com.community.security.JwtUtil;
 import com.community.dto.*;
 import com.community.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import com.community.exception.UnauthorizedException;
-import com.community.exception.BadRequestException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -78,21 +72,11 @@ public class UserController {
     // 회원정보 수정 
     @PatchMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String token,
-                                           @RequestPart(value = "nickname", required = false) @Valid UserProfileUpdateDTO request,
+                                           @RequestPart(value = "data", required = false) @Valid UserProfileUpdateDTO request,
                                            @RequestPart(value = "profileImage", required = false) MultipartFile imageFile) {
         Long userId = jwtUtil.getUserIdFromToken(token); 
-
-        if (request == null) {
-            request = new UserProfileUpdateDTO();
-        }
-
-        // 프로필 이미지 저장 (파일을 업로드한 경우에만 저장)
-        if (request.getNickname() != null || (imageFile != null && !imageFile.isEmpty())) {
-            userService.updateProfile(userId, request, imageFile);
-            return ResponseEntity.ok(Map.of("message", "profile_update_success"));
-        }
-    
-        throw new BadRequestException("No valid fields to update");
+        userService.updateProfile(userId, request, imageFile);
+        return ResponseEntity.ok(Map.of("message", "profile_update_success"));
     }
 
     // 비밀번호 변경 
