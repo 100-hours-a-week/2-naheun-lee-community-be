@@ -44,8 +44,8 @@ public class UserService {
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .nickname(request.getNickname())
-                    .profileImg(profileImageUrl)
-                    .member(true)
+                    .profileImgUrl(profileImageUrl)
+                    .isActive(true)
                     .build();
             userRepository.save(user);
     
@@ -76,7 +76,7 @@ public class UserService {
         return UserResponseDTO.builder()
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-                .profileImg(user.getProfileImg())
+                .profileImgUrl(user.getProfileImgUrl())
                 .build();
     }
 
@@ -97,7 +97,7 @@ public class UserService {
         String profileImageUrl = null;
         try {
             if (hasImage) {
-                fileHandler.deleteFile(user.getProfileImg()); 
+                fileHandler.deleteFile(user.getProfileImgUrl()); 
                 profileImageUrl = fileHandler.saveFile(profileImage, "profileuploads");
             }
 

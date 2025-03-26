@@ -1,13 +1,9 @@
 package com.community.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDateTime;
+
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,7 +51,7 @@ public class PostService {
             PostEntity post = PostEntity.builder()
                     .title(request.getTitle())
                     .content(request.getContent())
-                    .postImg(imageUrl)
+                    .postImgUrl(imageUrl)
                     .user(user)
                     .views(0)
                     .build();
@@ -75,7 +71,7 @@ public class PostService {
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .postImg(post.getPostImg())
+                .postImgUrl(post.getPostImgUrl())
                 .views(post.getViews())
                 .likesCount(likeRepository.countByPost(post))
                 .commentsCount(commentRepository.countByPost(post))
@@ -83,7 +79,7 @@ public class PostService {
                 .updatedAt(post.getUpdatedAt())
                 .user(PostResponseDTO.UserDTO.builder()
                         .nickname(post.getUser().getNickname())
-                        .profileImg(post.getUser().getProfileImg())
+                        .profileImgUrl(post.getUser().getProfileImgUrl())
                         .build())
                 .build()).collect(Collectors.toList());
     }
@@ -103,7 +99,7 @@ public class PostService {
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .postImg(post.getPostImg())
+                .postImgUrl(post.getPostImgUrl())
                 .views(post.getViews())
                 .likesCount(likeRepository.countByPost(post)) 
                 .commentsCount(commentRepository.countByPost(post)) 
@@ -111,7 +107,7 @@ public class PostService {
                 .updatedAt(post.getUpdatedAt())
                 .user(PostResponseDTO.UserDTO.builder()
                         .nickname(post.getUser().getNickname())
-                        .profileImg(post.getUser().getProfileImg())
+                        .profileImgUrl(post.getUser().getProfileImgUrl())
                         .build())
                 .comments(comments)
                 .isLikedByCurrentUser(isLiked)
@@ -148,7 +144,7 @@ public class PostService {
         String imageUrl = null;
         try {
             if (hasImage) {
-                fileHandler.deleteFile(post.getPostImg()); 
+                fileHandler.deleteFile(post.getPostImgUrl()); 
                 imageUrl = fileHandler.saveFile(imageFile, "postuploads"); 
             }
             post.update(title, content, imageUrl); 

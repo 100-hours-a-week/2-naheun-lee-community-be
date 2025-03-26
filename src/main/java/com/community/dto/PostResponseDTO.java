@@ -17,7 +17,7 @@ public class PostResponseDTO {
     private Long postId;
     private String title;
     private String content;
-    private String postImg;
+    private String postImgUrl;
     private int views;
     private int likesCount;
     private int commentsCount;
@@ -37,7 +37,7 @@ public class PostResponseDTO {
     @Builder
     public static class UserDTO {
         private String nickname;
-        private String profileImg;
+        private String profileImgUrl;
     }
 }
 

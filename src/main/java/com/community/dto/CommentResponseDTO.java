@@ -25,7 +25,7 @@ public class CommentResponseDTO {
     @Builder
     public static class UserDTO  {
         private String nickname;
-        private String profileImg;
+        private String profileImgUrl;
     }
 }
 

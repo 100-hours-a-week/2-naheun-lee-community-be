@@ -29,8 +29,8 @@ public class PostEntity {
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
 
-    @Column(name = "post_img")
-    private String postImg; 
+    @Column(name = "postimg_url")
+    private String postImgUrl;
 
     @Column(nullable = false)
     private int views = 0; 
@@ -57,10 +57,10 @@ public class PostEntity {
     }
 
     // 게시글 수정
-    public void update(String title, String content, String newImagePath) {
+    public void update(String title, String content, String postImg_url) {
         if (NullSafeUtils.hasText(title)) this.title = title;
         if (NullSafeUtils.hasText(content)) this.content = content;
-        if (NullSafeUtils.hasText(newImagePath)) this.postImg = newImagePath;
+        if (NullSafeUtils.hasText(postImg_url)) this.postImgUrl = postImg_url;
         this.updatedAt = LocalDateTime.now();
     }
 }

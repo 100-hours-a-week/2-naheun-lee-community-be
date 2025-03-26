@@ -24,20 +24,23 @@ public class FileHandler {
             String filePath = uploadDir + fileName;
 
             file.transferTo(new File(filePath));
-            return filePath;
+
+            // 프론트에서 접근할 URL 경로 반환
+            return "/" + directoryName + "/" + fileName;
 
         } catch (IOException e) {
             throw new RuntimeException("파일 저장 실패: " + e.getMessage(), e);
         }
     }
 
-    public void deleteFile(String filePath) {
-        if (filePath == null) return;
+    public void deleteFile(String urlPath) {
+        if (urlPath == null) return;
 
-        File file = new File(filePath);
+        String realPath = System.getProperty("user.dir") + urlPath;
+        File file = new File(realPath);
         if (file.exists()) {
             if (!file.delete()) {
-                throw new RuntimeException("파일 삭제 실패: " + filePath);
+                throw new RuntimeException("파일 삭제 실패: " + realPath);
             }
         }
     }

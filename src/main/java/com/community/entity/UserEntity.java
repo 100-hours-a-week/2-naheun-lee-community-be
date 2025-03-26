@@ -29,11 +29,11 @@ public class UserEntity {
     @Column(nullable = true, unique = true, length = 10)
     private String nickname;
 
-    @Column(nullable = false, name = "profile_img")
-    private String profileImg;
+    @Column(nullable = false, name = "profileimg_url")
+    private String profileImgUrl;
 
     @Column(nullable = false)
-    private boolean member; 
+    private boolean isActive; 
 
     @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
@@ -57,16 +57,17 @@ public class UserEntity {
 
      // 탈퇴 회원 처리
     public void deactivate() { 
-        this.member = false;
+        this.isActive = false;
         this.email = "deleted_" + this.id + "@deleted.com"; 
         this.nickname = null;
+        this.profileImgUrl = null;
         this.updatedAt = LocalDateTime.now();
     }
 
     // 프로필 수정
-    public void updateProfile(String nickname, String profileImg) {
+    public void updateProfile(String nickname, String profileImg_url) {
         if (NullSafeUtils.hasText(nickname)) this.nickname = nickname;
-        if (NullSafeUtils.hasText(profileImg)) this.profileImg = profileImg;
+        if (NullSafeUtils.hasText(profileImg_url)) this.profileImgUrl = profileImg_url;
         this.updatedAt = LocalDateTime.now();
     }
 
