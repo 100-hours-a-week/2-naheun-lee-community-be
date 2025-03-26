@@ -80,6 +80,7 @@ public class PostService {
                 .user(PostResponseDTO.UserDTO.builder()
                         .nickname(post.getUser().getNickname())
                         .profileImgUrl(post.getUser().getProfileImgUrl())
+                        .isActive(post.getUser().isActive())
                         .build())
                 .build()).collect(Collectors.toList());
     }

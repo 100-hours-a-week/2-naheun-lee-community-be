@@ -5,7 +5,6 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.community.dto.PostResponseDTO.UserDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
@@ -38,6 +37,7 @@ public class PostResponseDTO {
     public static class UserDTO {
         private String nickname;
         private String profileImgUrl;
+        private boolean isActive;
     }
 }
 
