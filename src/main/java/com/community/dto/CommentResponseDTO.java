@@ -26,6 +26,7 @@ public class CommentResponseDTO {
     public static class UserDTO  {
         private String nickname;
         private String profileImgUrl;
+        private boolean isActive;
     }
 }
 

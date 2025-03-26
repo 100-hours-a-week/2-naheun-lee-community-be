@@ -56,6 +56,7 @@ public class CommentService {
                         .user(CommentResponseDTO.UserDTO.builder()
                                 .nickname(comment.getUser().getNickname())
                                 .profileImgUrl(comment.getUser().getProfileImgUrl())
+                                .isActive(comment.getUser().isActive())
                                 .build())
                         .build()
         ).collect(Collectors.toList());

@@ -4,6 +4,7 @@ package com.community.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -109,6 +110,7 @@ public class PostService {
                 .user(PostResponseDTO.UserDTO.builder()
                         .nickname(post.getUser().getNickname())
                         .profileImgUrl(post.getUser().getProfileImgUrl())
+                        .isActive(post.getUser().isActive())
                         .build())
                 .comments(comments)
                 .isLikedByCurrentUser(isLiked)
@@ -154,6 +156,20 @@ public class PostService {
             if (imageUrl != null) fileHandler.deleteFile(imageUrl);
             throw e;
         }
+    }
+
+    // 게시글 이미지 삭제
+    @Transactional
+    public void deletePostImage(Long postId, Long userId) {
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException("Post not found"));
+
+        if (!post.getUser().getId().equals(userId)) {
+            throw new UnauthorizedException("Permission denied");
+        }
+
+        fileHandler.deleteFile(post.getPostImgUrl());
+        post.updatePostImg(null);
     }
 
     // 게시글 삭제

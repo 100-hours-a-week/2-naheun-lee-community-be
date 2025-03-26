@@ -63,5 +63,11 @@ public class PostEntity {
         if (NullSafeUtils.hasText(postImg_url)) this.postImgUrl = postImg_url;
         this.updatedAt = LocalDateTime.now();
     }
+
+    // 게시글 이미지 삭제
+    public void updatePostImg(String postImg_url) {
+        this.postImgUrl = postImg_url;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
 
