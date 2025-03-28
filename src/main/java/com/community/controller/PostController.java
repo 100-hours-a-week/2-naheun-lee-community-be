@@ -8,7 +8,6 @@ import com.community.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,7 +68,7 @@ public class PostController {
     }
 
     // 게시글 이미지 삭제
-    @PatchMapping("/post/{postId}/image")
+    @PatchMapping("/{postId}/image")
     public ResponseEntity<?> deletePostImage(@RequestHeader("Authorization") String token,
                                             @PathVariable("postId") Long postId ) {
         Long userId = jwtUtil.getUserIdFromToken(token);

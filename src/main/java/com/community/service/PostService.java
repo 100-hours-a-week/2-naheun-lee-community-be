@@ -4,7 +4,6 @@ package com.community.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -79,6 +78,7 @@ public class PostService {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .user(PostResponseDTO.UserDTO.builder()
+                        .userId(post.getUser().getId())
                         .nickname(post.getUser().getNickname())
                         .profileImgUrl(post.getUser().getProfileImgUrl())
                         .isActive(post.getUser().isActive())
@@ -108,6 +108,7 @@ public class PostService {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .user(PostResponseDTO.UserDTO.builder()
+                        .userId(post.getUser().getId())
                         .nickname(post.getUser().getNickname())
                         .profileImgUrl(post.getUser().getProfileImgUrl())
                         .isActive(post.getUser().isActive())

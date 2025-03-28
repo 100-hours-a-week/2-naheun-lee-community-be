@@ -36,12 +36,19 @@ public class FileHandler {
     public void deleteFile(String urlPath) {
         if (urlPath == null) return;
 
-        String realPath = System.getProperty("user.dir") + urlPath;
+        if (!urlPath.startsWith("/postuploads/") && !urlPath.startsWith("/profileuploads/")) {
+            throw new IllegalArgumentException("지원하지 않는 경로 형식입니다: " + urlPath);
+        }
+    
+        String realPath = System.getProperty("user.dir") + urlPath; 
         File file = new File(realPath);
+    
         if (file.exists()) {
             if (!file.delete()) {
                 throw new RuntimeException("파일 삭제 실패: " + realPath);
             }
+        } else {
+            System.out.println("삭제할 파일이 존재하지 않습니다: " + realPath);
         }
     }
 }

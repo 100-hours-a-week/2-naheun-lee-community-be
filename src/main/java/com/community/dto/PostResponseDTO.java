@@ -35,6 +35,7 @@ public class PostResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class UserDTO {
+        private Long userId;
         private String nickname;
         private String profileImgUrl;
         private boolean isActive;

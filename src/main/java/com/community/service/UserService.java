@@ -16,6 +16,8 @@ import com.community.exception.ConflictException;
 import com.community.exception.NotFoundException;
 import com.community.exception.BadRequestException;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -57,7 +59,7 @@ public class UserService {
     }
     
     // 로그인 
-    public String login(UserLoginRequestDTO request) {
+    public Map<String, Object> login(UserLoginRequestDTO request) {
         UserEntity user = userRepository.findActiveUserByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
@@ -65,7 +67,12 @@ public class UserService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        return jwtUtil.generateToken(user.getId(), user.getEmail());
+        String token = jwtUtil.generateToken(user.getId(), user.getEmail());
+
+        return Map.of(
+            "token", token,
+            "userId", user.getId()
+        );
     }
 
     // 회원정보 조회

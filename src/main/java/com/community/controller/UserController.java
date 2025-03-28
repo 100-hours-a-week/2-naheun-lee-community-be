@@ -27,21 +27,11 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid UserLoginRequestDTO request) {
         try {
-            String token = userService.login(request);
-            return ResponseEntity.ok().body(Map.of("token", token)); 
+            Map<String, Object> result = userService.login(request);
+            return ResponseEntity.ok().body(result);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage())); 
         }
-    }
-
-    // 로그아웃 (프론트에서 토큰 삭제) 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        if (token == null || !token.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body("Invalid token");
-        }
-        return ResponseEntity.ok(Map.of("message","logout_success"));
     }
 
     // 회원가입 
