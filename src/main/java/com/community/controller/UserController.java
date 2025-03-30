@@ -3,7 +3,6 @@ package com.community.controller;
 import com.community.security.JwtUtil;
 import com.community.dto.*;
 import com.community.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +12,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -49,14 +47,8 @@ public class UserController {
     @GetMapping
     public ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String token) {
         Long userId =  jwtUtil.getUserIdFromToken(token); 
-
-        UserResponseDTO userProfile = userService.getUserProfile(userId); 
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "profile_success");
-        response.put("data", userProfile);
-
-        return ResponseEntity.ok(response);
+        UserResponseDTO userProfile = userService.getUserProfile(userId);
+        return ResponseEntity.ok(Map.of("message", "profile_success", "data", userProfile));
     }
 
     // 회원정보 수정 

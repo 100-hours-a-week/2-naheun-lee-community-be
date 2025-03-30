@@ -73,7 +73,7 @@ public class PostController {
                                             @PathVariable("postId") Long postId ) {
         Long userId = jwtUtil.getUserIdFromToken(token);
         postService.deletePostImage(postId, userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("message", "postimg_deleted"));
     }
 
     // 게시글 삭제
