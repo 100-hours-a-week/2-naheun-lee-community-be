@@ -24,6 +24,7 @@ public class CommentResponseDTO {
     @Setter
     @Builder
     public static class UserDTO  {
+        private Long userId;
         private String nickname;
         private String profileImgUrl;
         private boolean isActive;

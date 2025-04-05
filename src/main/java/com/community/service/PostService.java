@@ -15,6 +15,7 @@ import com.community.entity.UserEntity;
 import com.community.exception.NotFoundException;
 import com.community.exception.UnauthorizedException;
 import com.community.exception.BadRequestException;
+import com.community.exception.ForbiddenException;
 import com.community.repository.PostRepository;
 import com.community.repository.UserRepository;
 import com.community.repository.LikeRepository;
@@ -133,7 +134,7 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException("Post not found"));
 
         if (!post.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("Permission denied");
+            throw new ForbiddenException("Permission denied");
         }
 
         String title = request != null ? request.getTitle() : null;
@@ -165,7 +166,7 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException("Post not found"));
 
         if (!post.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("Permission denied");
+            throw new ForbiddenException("Permission denied");
         }
 
         fileHandler.deleteFile(post.getPostImgUrl());
@@ -179,7 +180,7 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException("Post not found"));
 
         if (!post.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("Permission denied");
+            throw new ForbiddenException("Permission denied");
         }
 
         postRepository.delete(post);

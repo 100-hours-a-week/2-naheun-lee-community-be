@@ -5,8 +5,8 @@ import com.community.dto.CommentResponseDTO;
 import com.community.entity.CommentEntity;
 import com.community.entity.PostEntity;
 import com.community.entity.UserEntity;
+import com.community.exception.ForbiddenException;
 import com.community.exception.NotFoundException;
-import com.community.exception.UnauthorizedException;
 import com.community.repository.CommentRepository;
 import com.community.repository.PostRepository;
 import com.community.repository.UserRepository;
@@ -54,6 +54,7 @@ public class CommentService {
                         .createdAt(comment.getCreatedAt())
                         .updatedAt(comment.getUpdatedAt())
                         .user(CommentResponseDTO.UserDTO.builder()
+                                .userId(comment.getUser().getId())
                                 .nickname(comment.getUser().getNickname())
                                 .profileImgUrl(comment.getUser().getProfileImgUrl())
                                 .isActive(comment.getUser().isActive())
@@ -73,7 +74,7 @@ public class CommentService {
         }
 
         if (!comment.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("permission denied");
+            throw new ForbiddenException("permission denied");
         }
 
         comment.updateContent(request.getComment());
@@ -90,7 +91,7 @@ public class CommentService {
         }
 
         if (!comment.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("permission denied");
+            throw new ForbiddenException("permission denied");
         }
 
         commentRepository.delete(comment);
